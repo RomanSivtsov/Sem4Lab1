@@ -1,0 +1,123 @@
+namespace ClassLibrary
+{
+    public class Composition
+    {
+        public string SongTitle { get; set; }
+        public string Artist { get; set; }
+        public string Duration { get; set; }
+        public string Genre { get; set; }
+        public int Year { get; set; }
+        public string Country { get; set; }
+    }
+
+    public class MusicPlaylist
+    {
+        public List<Composition> Compositions { get; set; }
+
+        public MusicPlaylist()
+        {
+            Compositions = new List<Composition>();
+        }
+
+        public void LoadFromXml(string filePath)
+        {
+            try
+            {
+                using (XmlReader reader = XmlReader.Create(filePath))
+                {
+                    Composition currentComposition = null;
+
+                    while (reader.Read())
+                    {
+                        if (reader.NodeType == XmlNodeType.Element && reader.Name == "composition")
+                        {
+                            currentComposition = new Composition();
+                        }
+                        else if (reader.NodeType == XmlNodeType.Element && currentComposition != null)
+                        {
+                            switch (reader.Name)
+                            {
+                                case "song_title":
+                                    currentComposition.SongTitle = reader.ReadElementContentAsString();
+                                    break;
+                                case "artist":
+                                    currentComposition.Artist = reader.ReadElementContentAsString();
+                                    break;
+                                case "duration":
+                                    currentComposition.Duration = reader.ReadElementContentAsString();
+                                    break;
+                                case "genre":
+                                    currentComposition.Genre = reader.ReadElementContentAsString();
+                                    break;
+                                case "year":
+                                    currentComposition.Year = reader.ReadElementContentAsInt();
+                                    break;
+                                case "country":
+                                    currentComposition.Country = reader.ReadElementContentAsString();
+                                    break;
+                            }
+                        }
+                        else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "composition")
+                        {
+                            Compositions.Add(currentComposition);
+                            currentComposition = null;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Ошибка при загрузке XML файла: " + ex.Message);
+            }
+        }
+
+        public void SaveToXml(string filePath)
+        {
+            try
+            {
+                XmlWriterSettings settings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  "
+                };
+
+                using (XmlWriter writer = XmlWriter.Create(filePath, settings))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("music_playlist");
+
+                    foreach (var composition in Compositions)
+                    {
+                        writer.WriteStartElement("composition");
+
+                        writer.WriteElementString("song_title", composition.SongTitle);
+                        writer.WriteElementString("artist", composition.Artist);
+                        writer.WriteElementString("duration", composition.Duration);
+                        writer.WriteElementString("genre", composition.Genre);
+                        writer.WriteElementString("year", composition.Year.ToString());
+                        writer.WriteElementString("country", composition.Country);
+
+                        writer.WriteEndElement();
+                    }
+
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Ошибка при сохранении XML файла: " + ex.Message);
+            }
+        }
+
+        public void AddComposition(Composition composition)
+        {
+            Compositions.Add(composition);
+        }
+
+        public void RemoveComposition(Composition composition)
+        {
+            Compositions.Remove(composition);
+        }
+    }
+}
