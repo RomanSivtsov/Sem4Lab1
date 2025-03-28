@@ -1,0 +1,47 @@
+using ClassLibrary;
+using System;
+using System.Windows;
+
+namespace Sem4Lab1
+{
+    public partial class App : Application
+    {
+    }
+
+    public partial class MainWindow : Window
+    {
+        private MusicPlaylist playlist;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            playlist = new MusicPlaylist();
+        }
+
+        private void LoadButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                playlist.LoadFromXml("playlist.xml");
+                PlaylistDataGrid.ItemsSource = playlist.Compositions;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                playlist.SaveToXml("playlist_updated.xml");
+                MessageBox.Show("Плейлист успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+    }
+}
